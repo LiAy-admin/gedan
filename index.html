@@ -679,7 +679,7 @@ function renderFullMenu(filterText = '') {
             const btnText = isOrdered ? '已点' : '点歌';
             const iconClass = isOrdered ? 'fa-check-circle' : 'fa-plus-circle';
             const stateAttr = isOrdered ? 'ordered' : 'idle';
-            html += `<div class="dish-card" data-title="${escapeHtml(song.title)}" data-artist="${escapeHtml(song.artist)}"><div class="dish-info"><div class="dish-name">🎵 ${escapeHtml(song.title)}<span>${escapeHtml(song.artist)}</span></div><div class="dish-artist"><i class="fas fa-microphone-alt"></i> 主厨 · ${escapeHtml(song.artist)}</div></div><div class="order-badge" data-state="${stateAttr}"><i class="fas ${iconClass}"></i> ${btnText}</div></div>`;
+            html += `<div class="dish-card" data-title="${escapeHtml(song.title)}" data-artist="${escapeHtml(song.artist)}"><div class="dish-info"><div class="dish-name">🎵 ${escapeHtml(song.title)}<span>${escapeHtml(song.artist)}</span></div></div><div class="order-badge" data-state="${stateAttr}"><i class="fas ${iconClass}"></i> ${btnText}</div></div>`;
         }
         html += `</div></div>`;
     }
