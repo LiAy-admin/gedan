@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歌单管理系统 · 后台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #f5f5f0;
+            font-family: 'Segoe UI', 'Roboto', 'Microsoft YaHei', sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        /* 登录界面样式 */
+        .login-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2b2b1f 0%, #4a3f2f 100%);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-container.show {
+            display: flex;
+        }
+        .login-box {
+            background: white;
+            padding: 50px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 420px;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .login-header i {
+            font-size: 4rem;
+            color: #b87c3a;
+            margin-bottom: 20px;
+        }
+        .login-header h1 {
+            font-size: 2rem;
+            color: #2e281c;
+            margin-bottom: 10px;
+        }
+        .login-header p {
+            color: #9a7a5a;
+            font-size: 0.95rem;
+        }
+        .login-form .form-group {
+            margin-bottom: 25px;
+        }
+        .login-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #5c3a1f;
+        }
+        .login-form input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0d5c5;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .login-form input:focus {
+            outline: none;
+            border-color: #b87c3a;
+            box-shadow: 0 0 0 3px rgba(184, 124, 58, 0.1);
+        }
+        .login-form button {
+            width: 100%;
+            padding: 15px;
+            background: #b87c3a;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .login-form button:hover {
+            background: #9a6630;
+            transform: translateY(-2px);
+        }
+        .login-error {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+        .login-error.show {
+            display: block;
+        }
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .admin-header {
+            background: linear-gradient(135deg, #2b2b1f 0%, #4a3f2f 100%);
+            color: #fae6b3;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .admin-header h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .admin-header h1 i {
+            background: #b87c3a;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 1.3rem;
+        }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: #b87c3a;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #9a6630;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #f0e6d8;
+            color: #5a3c1c;
+        }
+        .btn-secondary:hover {
+            background: #e0d0c0;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .admin-body {
+            display: flex;
+            min-height: calc(100vh - 180px);
+        }
+        .sidebar {
+            width: 280px;
+            background: #fef9f3;
+            border-right: 2px solid #e9dbc9;
+            padding: 25px;
+            flex-shrink: 0;
+        }
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #5c3a1f;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #eddbbc;
+        }
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: #9a7a5a;
+            margin-bottom: 5px;
+        }
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #b87c3a;
+        }
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2e281c;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #f8f5f0;
+            border: 2px solid #e0d5c5;
+            border-radius: 12px;
+            padding: 10px 20px;
+            width: 350px;
+        }
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            font-size: 1rem;
+            color: #321f0c;
+        }
+        .search-box i {
+            color: #b87c3a;
+            margin-right: 10px;
+        }
+        .song-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .song-table thead {
+            background: #2b2b1f;
+            color: #fae6b3;
+        }
+        .song-table th, .song-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #f0e6d8;
+        }
+        .song-table th {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .song-table tbody tr:hover {
+            background: #fef9f3;
+        }
+        .song-table .actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-edit {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        .btn-edit:hover {
+            background: #ffe0b2;
+        }
+        .btn-delete {
+            background: #ffebee;
+            color: #dc3545;
+        }
+        .btn-delete:hover {
+            background: #ffcdd2;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: #2e281c;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #5c3a1f;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0d5c5;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #b87c3a;
+        }
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #9a7a5a;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #d4c5b0;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2b2b1f;
+            color: #fae6b3;
+            padding: 15px 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 2000;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        .import-export-section {
+            margin-top: 20px;
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+        @media (max-width: 1024px) {
+            .admin-body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 2px solid #e9dbc9;
+            }
+        }
+        @media (max-width: 768px) {
+            .admin-header {
+                padding: 20px;
+            }
+            .header-actions {
+                width: 100%;
+            }
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+            .search-box {
+                width: 100%;
+            }
+            .song-table {
+                font-size: 0.9rem;
+            }
+            .song-table th, .song-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 登录界面 -->
+<div class="login-container" id="loginContainer">
+    <div class="login-box">
+        <div class="login-header">
+            <i class="fas fa-lock"></i>
+            <h1>管理员登录</h1>
+            <p>请输入管理密码以访问后台</p>
+        </div>
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="adminPassword">管理密码</label>
+                <input type="password" id="adminPassword" placeholder="请输入管理密码" required>
+            </div>
+            <button type="submit">
+                <i class="fas fa-sign-in-alt"></i> 登录
+            </button>
+            <div class="login-error" id="loginError">密码错误,请重试</div>
+        </form>
+    </div>
+</div>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1><i class="fas fa-cogs"></i> 歌单管理系统</h1>
+        <div class="header-actions">
+            <a href="index.html" class="btn btn-secondary">
+                <i class="fas fa-external-link-alt"></i> 查看前台
+            </a>
+            <button class="btn btn-danger" id="logoutBtn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> 退出登录
+            </button>
+        </div>
+    </div>
+
+    <div class="admin-body">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title"><i class="fas fa-chart-pie"></i> 统计数据</div>
+                <div class="stat-card">
+                    <div class="label">总歌曲数</div>
+                    <div class="value" id="totalSongs">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">歌手数量</div>
+                    <div class="value" id="totalArtists">0</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title"><i class="fas fa-database"></i> 数据管理</div>
+                <button class="btn btn-primary" onclick="showAddModal()" style="width: 100%; margin-bottom: 10px;">
+                    <i class="fas fa-plus"></i> 添加新歌曲
+                </button>
+                <div class="import-export-section">
+                    <button class="btn btn-secondary" onclick="exportSongs()" style="width: 100%; margin-bottom: 8px;">
+                        <i class="fas fa-download"></i> 导出歌单
+                    </button>
+                    <div class="file-input-wrapper" style="width: 100%;">
+                        <button class="btn btn-secondary" style="width: 100%;">
+                            <i class="fas fa-upload"></i> 导入歌单
+                        </button>
+                        <input type="file" accept=".json" onchange="importSongs(event)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title"><i class="fas fa-shield-alt"></i> 系统设置</div>
+                <button class="btn btn-secondary" onclick="showChangePasswordModal()" style="width: 100%; margin-bottom: 10px;">
+                    <i class="fas fa-key"></i> 修改密码
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title"><i class="fas fa-undo"></i> 数据操作</div>
+                <button class="btn btn-danger" onclick="resetToDefault()" style="width: 100%;">
+                    <i class="fas fa-sync-alt"></i> 重置为默认歌单
+                </button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="section-header">
+                <div class="section-title">歌曲列表</div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="搜索歌曲或歌手..." oninput="filterSongs()">
+                </div>
+            </div>
+
+            <table class="song-table" id="songTable">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>歌曲名称</th>
+                        <th>歌手</th>
+                        <th style="width: 120px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="songTableBody">
+                    <!-- 动态内容 -->
+                </tbody>
+            </table>
+
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="fas fa-music"></i>
+                <h3>暂无歌曲</h3>
+                <p>点击"添加新歌曲"开始管理歌单</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加/编辑歌曲模态框 -->
+<div class="modal" id="songModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">添加新歌曲</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="songForm">
+            <input type="hidden" id="songId">
+            <div class="form-group">
+                <label for="songTitle">歌曲名称 *</label>
+                <input type="text" id="songTitle" placeholder="请输入歌曲名称" required>
+            </div>
+            <div class="form-group">
+                <label for="songArtist">歌手 *</label>
+                <input type="text" id="songArtist" placeholder="请输入歌手名称" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check"></i> 保存
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 修改密码模态框 -->
+<div class="modal" id="passwordModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>修改管理密码</h2>
+            <button class="modal-close" onclick="closePasswordModal()">&times;</button>
+        </div>
+        <form id="passwordForm">
+            <div class="form-group">
+                <label for="oldPassword">当前密码 *</label>
+                <input type="password" id="oldPassword" placeholder="请输入当前密码" required>
+            </div>
+            <div class="form-group">
+                <label for="newPassword">新密码 *</label>
+                <input type="password" id="newPassword" placeholder="请输入新密码" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">确认新密码 *</label>
+                <input type="password" id="confirmPassword" placeholder="请再次输入新密码" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closePasswordModal()">取消</button>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check"></i> 确认修改
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== 登录验证系统 ====================
+
+// 默认管理密码(建议首次登录后修改)
+const DEFAULT_ADMIN_PASSWORD = 'admin123';
+
+// 检查是否已登录
+function checkAuth() {
+    const session = localStorage.getItem('gedan_admin_session');
+    if (!session) {
+        showLoginForm();
+        return false;
+    }
+
+    // 验证会话是否有效
+    const sessionData = JSON.parse(session);
+    const now = Date.now();
+    if (now - sessionData.timestamp > 24 * 60 * 60 * 1000) { // 24小时过期
+        localStorage.removeItem('gedan_admin_session');
+        showLoginForm();
+        return false;
+    }
+
+    return true;
+}
+
+// 显示登录表单
+function showLoginForm() {
+    document.getElementById('loginContainer').classList.add('show');
+    document.querySelector('.admin-container').style.display = 'none';
+}
+
+// 隐藏登录表单
+function hideLoginForm() {
+    document.getElementById('loginContainer').classList.remove('show');
+    document.querySelector('.admin-container').style.display = 'block';
+}
+
+// 登录验证
+function login(password) {
+    // 获取存储的密码,如果没有则使用默认密码
+    const storedPassword = localStorage.getItem('gedan_admin_password') || DEFAULT_ADMIN_PASSWORD;
+
+    if (password === storedPassword) {
+        // 创建会话
+        const session = {
+            timestamp: Date.now(),
+            user: 'admin'
+        };
+        localStorage.setItem('gedan_admin_session', JSON.stringify(session));
+        hideLoginForm();
+        showToast('登录成功');
+        return true;
+    }
+
+    return false;
+}
+
+// 退出登录
+function logout() {
+    if (confirm('确定要退出登录吗?')) {
+        localStorage.removeItem('gedan_admin_session');
+        showLoginForm();
+        showToast('已退出登录');
+    }
+}
+
+// 登录表单提交
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const password = document.getElementById('adminPassword').value;
+
+    if (login(password)) {
+        document.getElementById('loginError').classList.remove('show');
+        document.getElementById('adminPassword').value = '';
+    } else {
+        document.getElementById('loginError').classList.add('show');
+    }
+});
+
+// 显示修改密码模态框
+function showChangePasswordModal() {
+    document.getElementById('passwordModal').classList.add('active');
+}
+
+// 关闭修改密码模态框
+function closePasswordModal() {
+    document.getElementById('passwordModal').classList.remove('active');
+    document.getElementById('passwordForm').reset();
+}
+
+// 修改密码表单提交
+document.getElementById('passwordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const oldPassword = document.getElementById('oldPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    // 验证当前密码
+    const storedPassword = localStorage.getItem('gedan_admin_password') || DEFAULT_ADMIN_PASSWORD;
+    if (oldPassword !== storedPassword) {
+        showToast('当前密码错误');
+        return;
+    }
+
+    // 验证新密码
+    if (newPassword.length < 6) {
+        showToast('新密码至少需要6个字符');
+        return;
+    }
+
+    // 验证两次输入的密码是否一致
+    if (newPassword !== confirmPassword) {
+        showToast('两次输入的密码不一致');
+        return;
+    }
+
+    // 保存新密码
+    localStorage.setItem('gedan_admin_password', newPassword);
+    closePasswordModal();
+    showToast('密码修改成功');
+});
+
+// 点击模态框外部关闭修改密码模态框
+document.getElementById('passwordModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closePasswordModal();
+    }
+});
+
+// 页面加载时检查登录状态
+if (!checkAuth()) {
+    // 未登录,阻止后续代码执行
+    throw new Error('Unauthorized access');
+}
+
+// ==================== 歌单管理系统 ====================
+
+// 默认歌单数据
+const DEFAULT_SONGS_TEXT = `
+望故乡 - 陈楚生
+有没有人告诉你 - 陈楚生
+我要你 - 任素汐
+天使的翅膀 - 安琥
+南山南 - 马頔
+诺言 - 郭有才
+老男孩 - 筷子兄弟
+假如爱有天意 - 李健
+异乡人 - 李健
+当你老了 - 赵照
+你就不要想起我 - 田馥甄
+余香 - 张小九
+我真怕自己哪天倒下 - 张良
+春风十里 - 鹿先森乐队
+再见 - 张震岳
+爱的初体验 - 张震岳
+在雨中 - 汪峰
+北京北京 - 汪峰
+你是人间四月天 - 解忧邵帅
+四块五妞 - 隔壁老樊
+姬和不如 - 隔壁老樊
+多想在平庸的生活拥抱你 - 隔壁老樊
+四块五 - 隔壁老樊
+我曾 - 隔壁老樊
+花房姑娘 - 崔健
+如果这都不算爱 - 张学友
+一千个伤心的理由 - 张学友
+我真的受伤了 - 张学友
+情非得已 - 庾澄庆
+春泥 - 庾澄庆
+爱的代价 - 张艾嘉
+灰姑娘 - 郑钧
+一个人一座城 - 曹寅
+那个女孩 - 张泽熙
+单身情歌 - 林志炫
+亲密爱人 - 梅艳芳
+爱我的人和我爱的人 - 裘海正
+让泪化作相思雨 - 南合文斗
+兄弟抱一下 - 庞龙
+校花 - 庞龙
+父亲的散文诗 - 许飞
+鸿雁 - 呼斯楞
+留什么给你 - 孙楠
+十年 - 陈奕迅
+张三的歌 - 李寿全
+红尘来去一场梦 - 巫启贤
+麻雀 - 李荣浩
+友情岁月 - 郑伊健
+因为爱所以爱 - 谢霆锋
+男孩 - 梁博
+你知道我在等你吗 - 张洪量
+生而为人 - 尚士达
+一生有你 - 水木年华
+你的答案 - 阿冗
+一生所爱 - 卢冠廷
+推开世界的门 - 杨乃文
+感动天感动地 - 宇桐非
+童话 - 光良
+特别的爱给特别的你 - 伍思凯
+一个歌手的情书 - 周三
+求佛 - 誓言
+太早 - 刘允乐
+空城 - 杨坤
+再见吧喵小姐 - 王晓天
+女人的选择 - 姜育恒
+天亮 - 曾轶可
+把悲伤留给自己 - 陈升
+林中鸟 - 葛林
+当我要走的时候 - 陈硕子
+我要找到你 - 陈明
+花香 - 许绍洋
+再见只是陌生人 - 庄心妍
+预谋 - 许佳慧
+天际 - 姜玉阳
+再见杰克 - 痛仰乐队
+雨一直下 - 张宇
+丫头 - 王童语
+最浪漫的事 - 邝美云
+成都 - 赵雷
+蓝莲花 - 许巍
+故乡 - 许巍
+曾经的你 - 许巍
+旅行 - 许巍
+像风一样自由 - 许巍
+执着 - 许巍
+时光 - 许巍
+永隔一江水 - 许巍
+生活不止眼前的苟且 - 许巍
+安和桥 - 宋冬野
+董小姐 - 宋冬野
+斑马斑马 - 宋冬野
+鸽子 - 徐秉龙
+海阔天空 - Beyond
+光辉岁月 - Beyond
+情人 - Beyond
+不再犹豫 - Beyond
+再见理想 - Beyond
+灰色轨迹 - Beyond
+世界第一等 - 刘德华
+笨小孩 - 刘德华
+冰雨 - 刘德华
+爱你一万年 - 刘德华
+都怪我 - 刘德华
+别怕我伤心 - 张信哲
+爱如潮水 - 张信哲
+过火 - 张信哲
+突然的自我 - 伍佰
+再度重相逢 - 伍佰
+与你到永久 - 伍佰
+鬼迷心窍 - 李宗盛
+凡人歌 - 李宗盛
+漂洋过海来看你 - 李宗盛
+问 - 李宗盛
+童年 - 罗大佑
+野百合也有春天 - 罗大佑
+恋曲1990 - 罗大佑
+让我欢喜让我忧 - 周华健
+亲亲我的宝贝 - 周华健
+朋友 - 周华健
+外面的世界 - 齐秦
+大约在冬季 - 齐秦
+狼 - 齐秦
+安妮 - 王杰
+她的背影 - 王杰
+我是真的爱上你 - 王杰
+那就这样吧 - 动力火车
+第一滴泪 - 动力火车
+有多少爱可以重来 - 迪克牛仔
+我这个你不爱的人 - 迪克牛仔
+梦醒时分 - 迪克牛仔
+风飞沙 - 迪克牛仔
+我的好兄弟 - 高进
+下雪哈尔滨 - 高进
+男人歌 - 高进
+听着情歌流眼泪 - 高进
+其实都没有 - 杨宗纬
+一次就好 - 杨宗纬
+像我这样的人 - 毛不易
+消愁 - 毛不易
+夜空中最亮的星 - 逃跑计划
+一万次悲伤 - 逃跑计划
+回心转意 - 黑龙
+我爱你你却爱着他 - 黑龙
+感谢 - 黑龙
+她很孤独 - 海伦
+天真的橡皮 - 王小帅
+搀扶 - 马健涛
+童年老家 - 马健涛
+一个人挺好 - 杨小壮
+再也不是你 - 杨小壮
+玫瑰 - 贰佰
+狗日的青春 - 贰佰
+乌兰巴托的夜 - 李志
+天空之城 - 李志
+和你在一起 - 李志
+去大理 - 郝云
+活着 - 郝云
+平凡之路 - 朴树
+那些花儿 - 朴树
+后来 - 刘若英
+虎口脱险 - 老狼
+同桌的你 - 老狼
+在劫难逃 - 老狼
+难道 - 羽泉
+奔跑 - 羽泉
+我是一只小小鸟 - 赵传
+爱要怎么说出口 - 赵传
+我们不一样 - 大壮
+差一步 - 大壮
+往后余生 - 马良
+醒着醉 - 马良
+听说 - 丛铭君
+走 - 刘鹏远
+他真的对你好吗 - 富豪
+我把我的理想卖了 - 二力
+等天亮 - 大欢
+又 - 李天佑
+坚强的理由 - 王旭
+一流泪的时间 - 赵紫骅
+怪我更爱我自己 - 赵紫骅
+无期 - 光头华夏
+归来 - 满江
+人情味 - 汪洛宾
+野人 - 孟维来
+我不能说 - 二百
+大不了 - 陕西牛犇
+`;
+
+function parseSongs(raw) {
+    const lines = raw.split(/\r?\n/);
+    const songs = [];
+    for (let line of lines) {
+        line = line.trim();
+        if (line === "") continue;
+        const lastDash = line.lastIndexOf('-');
+        if (lastDash === -1) continue;
+        let title = line.substring(0, lastDash).trim();
+        let artist = line.substring(lastDash + 1).trim();
+        if (title && artist) songs.push({ id: generateId(), title, artist });
+    }
+    return songs;
+}
+
+function generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+}
+
+// 初始化歌单
+function initSongs() {
+    let songs = localStorage.getItem('gedan_songs');
+    if (!songs) {
+        const defaultSongs = parseSongs(DEFAULT_SONGS_TEXT);
+        localStorage.setItem('gedan_songs', JSON.stringify(defaultSongs));
+        return defaultSongs;
+    }
+    return JSON.parse(songs);
+}
+
+// 保存歌单
+function saveSongs(songs) {
+    localStorage.setItem('gedan_songs', JSON.stringify(songs));
+}
+
+let allSongs = initSongs();
+
+// 渲染表格
+function renderTable(filter = '') {
+    const tbody = document.getElementById('songTableBody');
+    const emptyState = document.getElementById('emptyState');
+    const table = document.getElementById('songTable');
+
+    let filteredSongs = allSongs;
+    if (filter) {
+        const lowerFilter = filter.toLowerCase();
+        filteredSongs = allSongs.filter(song =>
+            song.title.toLowerCase().includes(lowerFilter) ||
+            song.artist.toLowerCase().includes(lowerFilter)
+        );
+    }
+
+    if (filteredSongs.length === 0) {
+        table.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+    }
+
+    table.style.display = 'table';
+    emptyState.style.display = 'none';
+
+    tbody.innerHTML = filteredSongs.map((song, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td>${escapeHtml(song.title)}</td>
+            <td>${escapeHtml(song.artist)}</td>
+            <td class="actions">
+                <button class="btn-icon btn-edit" onclick="editSong('${song.id}')" title="编辑">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-icon btn-delete" onclick="deleteSong('${song.id}')" title="删除">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+
+    updateStats();
+}
+
+function updateStats() {
+    document.getElementById('totalSongs').textContent = allSongs.length;
+    const artists = new Set(allSongs.map(s => s.artist));
+    document.getElementById('totalArtists').textContent = artists.size;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+function showAddModal() {
+    document.getElementById('modalTitle').textContent = '添加新歌曲';
+    document.getElementById('songForm').reset();
+    document.getElementById('songId').value = '';
+    document.getElementById('songModal').classList.add('active');
+}
+
+function editSong(id) {
+    const song = allSongs.find(s => s.id === id);
+    if (!song) return;
+
+    document.getElementById('modalTitle').textContent = '编辑歌曲';
+    document.getElementById('songId').value = song.id;
+    document.getElementById('songTitle').value = song.title;
+    document.getElementById('songArtist').value = song.artist;
+    document.getElementById('songModal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('songModal').classList.remove('active');
+}
+
+function deleteSong(id) {
+    if (!confirm('确定要删除这首歌曲吗?')) return;
+
+    allSongs = allSongs.filter(s => s.id !== id);
+    saveSongs(allSongs);
+    renderTable(document.getElementById('searchInput').value);
+    showToast('删除成功');
+}
+
+function filterSongs() {
+    const filter = document.getElementById('searchInput').value;
+    renderTable(filter);
+}
+
+function exportSongs() {
+    const dataStr = JSON.stringify(allSongs, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `gedan_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast('导出成功');
+}
+
+function importSongs(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if (!Array.isArray(imported)) throw new Error('Invalid format');
+
+            const validSongs = imported.filter(s => s.title && s.artist).map(s => ({
+                id: s.id || generateId(),
+                title: s.title,
+                artist: s.artist
+            }));
+
+            allSongs = validSongs;
+
+            // 按歌手名称排序
+            allSongs.sort((a, b) => {
+                const artistCompare = a.artist.localeCompare(b.artist, 'zh-CN');
+                if (artistCompare !== 0) return artistCompare;
+                return a.title.localeCompare(b.title, 'zh-CN');
+            });
+
+            saveSongs(allSongs);
+            renderTable();
+            showToast(`成功导入 ${validSongs.length} 首歌曲`);
+        } catch (err) {
+            showToast('导入失败: 文件格式错误');
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}
+
+function resetToDefault() {
+    if (!confirm('确定要重置为默认歌单吗? 当前歌单将被清空!')) return;
+
+    allSongs = parseSongs(DEFAULT_SONGS_TEXT);
+
+    // 按歌手名称排序
+    allSongs.sort((a, b) => {
+        const artistCompare = a.artist.localeCompare(b.artist, 'zh-CN');
+        if (artistCompare !== 0) return artistCompare;
+        return a.title.localeCompare(b.title, 'zh-CN');
+    });
+
+    saveSongs(allSongs);
+    renderTable();
+    showToast('已重置为默认歌单');
+}
+
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// 表单提交
+document.getElementById('songForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const id = document.getElementById('songId').value;
+    const title = document.getElementById('songTitle').value.trim();
+    const artist = document.getElementById('songArtist').value.trim();
+
+    if (!title || !artist) {
+        showToast('请填写完整信息');
+        return;
+    }
+
+    if (id) {
+        // 编辑
+        const index = allSongs.findIndex(s => s.id === id);
+        if (index !== -1) {
+            allSongs[index].title = title;
+            allSongs[index].artist = artist;
+        }
+        showToast('修改成功');
+    } else {
+        // 新增
+        allSongs.push({
+            id: generateId(),
+            title: title,
+            artist: artist
+        });
+        showToast('添加成功');
+    }
+
+    // 按歌手名称排序
+    allSongs.sort((a, b) => {
+        const artistCompare = a.artist.localeCompare(b.artist, 'zh-CN');
+        if (artistCompare !== 0) return artistCompare;
+        return a.title.localeCompare(b.title, 'zh-CN');
+    });
+
+    saveSongs(allSongs);
+    renderTable(document.getElementById('searchInput').value);
+    closeModal();
+});
+
+// 点击模态框外部关闭
+document.getElementById('songModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
+// 初始化渲染
+renderTable();
+</script>
+
+</body>
+</html>

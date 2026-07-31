@@ -337,6 +337,9 @@
                 <i class="fas fa-search"></i>
                 <input type="text" id="menuSearch" placeholder="搜歌名 / 歌手..." autocomplete="off">
             </div>
+            <a href="admin.html" style="background: #b87c3a; color: white; padding: 12px 24px; border-radius: 60px; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-cog"></i> 管理后台
+            </a>
         </div>
     </div>
 
@@ -565,7 +568,28 @@ function parseSongs(raw) {
     return songs;
 }
 
-const allSongs = parseSongs(rawSongsText);
+// 从 localStorage 加载歌曲,如果没有则使用默认数据
+let allSongs = [];
+const storedSongs = localStorage.getItem('gedan_songs');
+if (storedSongs) {
+    try {
+        allSongs = JSON.parse(storedSongs);
+    } catch (e) {
+        allSongs = parseSongs(rawSongsText);
+    }
+} else {
+    allSongs = parseSongs(rawSongsText);
+    // 首次加载时保存到 localStorage
+    localStorage.setItem('gedan_songs', JSON.stringify(allSongs));
+}
+
+// 按歌手名称排序
+allSongs.sort((a, b) => {
+    const artistCompare = a.artist.localeCompare(b.artist, 'zh-CN');
+    if (artistCompare !== 0) return artistCompare;
+    return a.title.localeCompare(b.title, 'zh-CN');
+});
+
 document.getElementById('totalSongCount').innerText = allSongs.length;
 
 const artistGroups = new Map();
